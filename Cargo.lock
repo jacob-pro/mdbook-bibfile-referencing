@@ -849,7 +849,6 @@ dependencies = [
  "pandoc",
  "serde",
  "serde_json",
- "tempfile",
 ]
 
 [[package]]

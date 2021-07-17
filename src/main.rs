@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod test;
+
 use clap::Clap;
 use mdbook::book::{Book, BookItem};
 use mdbook::errors::Error;
@@ -108,4 +111,3 @@ impl Preprocessor for Bibliography {
         Ok(book)
     }
 }
-
