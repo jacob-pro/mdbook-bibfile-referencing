@@ -17,7 +17,7 @@ jobs:
       - name: Install Pandoc
         run: sudo dpkg -i pandoc.deb
       - name: Install mdBook
-        run: cargo install mdbook --debug
+        run: cargo install mdbook --debug --no-default-features
       - name: Cargo Test
         run: cargo test -- --nocapture
 
@@ -30,7 +30,7 @@ jobs:
       - name: Install Pandoc
         run: sudo dpkg -i pandoc.deb
       - name: Install mdBook
-        run: cargo install mdbook --debug
+        run: cargo install mdbook --debug --no-default-features
       - name: Cargo Test
         run: cargo test -- --nocapture
 
