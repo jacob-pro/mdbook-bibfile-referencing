@@ -6,9 +6,12 @@ use mdbook::book::{Book, BookItem};
 use mdbook::errors::Error;
 use mdbook::preprocess::{CmdPreprocessor, Preprocessor, PreprocessorContext};
 use pandoc::PandocOutput::ToBuffer;
+use pandoc::{Pandoc, PandocOption};
+use semver::{Version, VersionReq};
 use std::io;
 use std::path::PathBuf;
 use std::process;
+use std::process::Command;
 
 #[derive(Clap)]
 #[allow(unused)]
@@ -59,7 +62,7 @@ fn handle_preprocessing(bib: PathBuf, csl: PathBuf) -> Result<(), Error> {
     if !csl.exists() {
         Error::msg("CSL file not found");
     }
-    let pre = Bibliography::new(bib, csl);
+    let pre = Bibliography::new(bib, csl, builtin_citeproc_support()?);
 
     let (ctx, book) = CmdPreprocessor::parse_input(io::stdin())?;
 
@@ -78,13 +81,22 @@ fn handle_preprocessing(bib: PathBuf, csl: PathBuf) -> Result<(), Error> {
 }
 
 pub struct Bibliography {
-    bib: PathBuf,
-    csl: PathBuf,
+    pandoc: Pandoc,
 }
 
 impl Bibliography {
-    pub fn new(bib: PathBuf, csl: PathBuf) -> Self {
-        Self { bib, csl }
+    pub fn new(bib: PathBuf, csl: PathBuf, builtin_citeproc: bool) -> Self {
+        let mut p = pandoc::new();
+        p.add_option(PandocOption::Csl(csl));
+        if builtin_citeproc {
+            p.add_option(PandocOption::Citeproc);
+        } else {
+            p.add_option(PandocOption::Filter("pandoc-citeproc".into()));
+        }
+        p.set_bibliography(&bib);
+        p.set_output(pandoc::OutputKind::Pipe);
+        p.set_output_format(pandoc::OutputFormat::MarkdownStrict, vec![]);
+        Self { pandoc: p }
     }
 }
 
@@ -96,18 +108,41 @@ impl Preprocessor for Bibliography {
     fn run(&self, _ctx: &PreprocessorContext, mut book: Book) -> Result<Book, Error> {
         book.for_each_mut(|item| {
             if let BookItem::Chapter(chapter) = item {
-                let mut p = pandoc::new();
+                let mut p = self.pandoc.clone();
                 p.set_input(pandoc::InputKind::Pipe(chapter.content.clone()));
-                p.add_option(pandoc::PandocOption::Filter("pandoc-citeproc".into()));
-                p.add_option(pandoc::PandocOption::Csl(self.csl.clone()));
-                p.set_bibliography(&self.bib);
-                p.set_output(pandoc::OutputKind::Pipe);
-                p.set_output_format(pandoc::OutputFormat::MarkdownStrict, vec![]);
                 if let ToBuffer(x) = p.execute().unwrap() {
                     chapter.content = x;
                 }
             }
         });
         Ok(book)
+    }
+}
+
+pub fn builtin_citeproc_support() -> Result<bool, Error> {
+    let output = Command::new("pandoc")
+        .arg("--version")
+        .output()
+        .map_err(|_| Error::msg("Failed to call pandoc - is it installed?"))?;
+    if !output.status.success() {
+        let stderr = std::str::from_utf8(&output.stderr).unwrap();
+        Err(Error::msg(format!("mdbook failed to clean: {}", stderr)))
+    } else {
+        let stdout = std::str::from_utf8(&output.stdout).unwrap();
+        let line_1 = stdout
+            .lines()
+            .next()
+            .ok_or(Error::msg("Pandoc version error"))?;
+        let version_trunc = line_1
+            .replace("pandoc ", "")
+            .split(".")
+            .take(3)
+            .collect::<Vec<&str>>()
+            .join(".");
+        let semver = Version::parse(&version_trunc).map_err(|_| {
+            Error::msg(format!("Failed to parse pandoc version: {}", version_trunc))
+        })?;
+        let required = VersionReq::parse(">=2.11.0").unwrap();
+        return Ok(required.matches(&semver));
     }
 }

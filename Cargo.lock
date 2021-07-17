@@ -847,6 +847,7 @@ dependencies = [
  "clap 3.0.0-beta.2",
  "mdbook",
  "pandoc",
+ "semver",
  "serde",
  "serde_json",
 ]
@@ -1001,8 +1002,7 @@ checksum = "afb2e1c3ee07430c2cf76151675e583e0f19985fa6efae47d6848a3e2c824f85"
 [[package]]
 name = "pandoc"
 version = "0.8.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "84060e442eb742cdba4038302c9924aecd67434073b9785dd9a6cec8a3f4065a"
+source = "git+https://github.com/oli-obk/rust-pandoc#c2b7fd2f7946700ee59d1e8e310a204b2962b4e8"
 dependencies = [
  "itertools",
 ]
@@ -1388,6 +1388,12 @@ name = "scoped-tls"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ea6a9290e3c9cf0f18145ef7ffa62d68ee0bf5fcd651017e586dc7fd5da448c2"
+
+[[package]]
+name = "semver"
+version = "1.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5f3aac57ee7f3272d8395c6e4f502f434f0e289fcd62876f70daa008c20dcabe"
 
 [[package]]
 name = "serde"

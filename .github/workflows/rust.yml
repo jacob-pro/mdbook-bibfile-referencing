@@ -1,0 +1,42 @@
+name: Rust
+
+on: [push, pull_request]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+
+  legacy_pandoc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download Pandoc 2.10
+        run: wget -O pandoc.deb https://github.com/jgm/pandoc/releases/download/2.10.1/pandoc-2.10.1-1-amd64.deb
+      - name: Install Pandoc
+        run: dpkg -i pandoc.deb
+      - name: Install mdBook
+        run: cargo install mdbook
+      - name: Run tests
+        run: cargo test
+
+  modern_pandoc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download Pandoc 2.14
+        run: wget -O pandoc.deb https://github.com/jgm/pandoc/releases/download/2.14.0.3/pandoc-2.14.0.3-1-amd64.deb
+      - name: Install Pandoc
+        run: dpkg -i pandoc.deb
+      - name: Install mdBook
+        run: cargo install mdbook
+      - name: Run tests
+        run: cargo test
+
+  check_style:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Formatting
+        run: cargo fmt -- --check
+      - name: Check Cargo
+        run: cargo install cargo-sort && cargo-sort --check
