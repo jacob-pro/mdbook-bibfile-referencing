@@ -14,7 +14,7 @@ jobs:
       - name: Download Pandoc 2.10
         run: wget -O pandoc.deb https://github.com/jgm/pandoc/releases/download/2.10.1/pandoc-2.10.1-1-amd64.deb
       - name: Install Pandoc
-        run: dpkg -i pandoc.deb
+        run: sudo dpkg -i pandoc.deb
       - name: Install mdBook
         run: cargo install mdbook
       - name: Run tests
@@ -27,7 +27,7 @@ jobs:
       - name: Download Pandoc 2.14
         run: wget -O pandoc.deb https://github.com/jgm/pandoc/releases/download/2.14.0.3/pandoc-2.14.0.3-1-amd64.deb
       - name: Install Pandoc
-        run: dpkg -i pandoc.deb
+        run: sudo dpkg -i pandoc.deb
       - name: Install mdBook
         run: cargo install mdbook
       - name: Run tests
@@ -36,6 +36,7 @@ jobs:
   check_style:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Check Formatting
         run: cargo fmt -- --check
       - name: Check Cargo
