@@ -7,11 +7,11 @@ use mdbook::errors::Error;
 use mdbook::preprocess::{CmdPreprocessor, Preprocessor, PreprocessorContext};
 use pandoc::PandocOutput::ToBuffer;
 use pandoc::{Pandoc, PandocOption};
-use semver::{Version, VersionReq};
 use std::io;
 use std::path::PathBuf;
 use std::process;
 use std::process::Command;
+use version_compare::Version;
 
 #[derive(Clap)]
 #[allow(unused)]
@@ -129,20 +129,16 @@ pub fn builtin_citeproc_support() -> Result<bool, Error> {
         Err(Error::msg(format!("mdbook failed to clean: {}", stderr)))
     } else {
         let stdout = std::str::from_utf8(&output.stdout).unwrap();
-        let line_1 = stdout
+        let version = stdout
             .lines()
             .next()
-            .ok_or(Error::msg("Pandoc version error"))?;
-        let version_trunc = line_1
-            .replace("pandoc ", "")
-            .split(".")
-            .take(3)
-            .collect::<Vec<&str>>()
-            .join(".");
-        let semver = Version::parse(&version_trunc).map_err(|_| {
-            Error::msg(format!("Failed to parse pandoc version: {}", version_trunc))
-        })?;
-        let required = VersionReq::parse(">=2.11.0").unwrap();
-        return Ok(required.matches(&semver));
+            .ok_or(Error::msg("Pandoc version error"))?
+            .replace("pandoc ", "");
+        let installed = Version::from(&version).ok_or(Error::msg(format!(
+            "Failed to parse pandoc version: {}",
+            version
+        )))?;
+        let required = Version::from("2.11.0").unwrap();
+        return Ok(installed >= required);
     }
 }

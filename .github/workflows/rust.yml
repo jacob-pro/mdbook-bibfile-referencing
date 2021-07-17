@@ -18,8 +18,8 @@ jobs:
         run: sudo dpkg -i pandoc.deb
       - name: Install mdBook
         run: cargo install mdbook --debug
-      - name: Run tests
-        run: cargo test
+      - name: Cargo Test
+        run: cargo test -- --nocapture
 
   modern_pandoc:
     runs-on: ubuntu-latest
@@ -31,16 +31,16 @@ jobs:
         run: sudo dpkg -i pandoc.deb
       - name: Install mdBook
         run: cargo install mdbook --debug
-      - name: Run tests
-        run: cargo test
+      - name: Cargo Test
+        run: cargo test -- --nocapture
 
   check_style:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Check Formatting
+      - name: Cargo Format Check
         run: cargo fmt -- --check
-      - name: Check Cargo
+      - name: Cargo Sort Check
         run: cargo install cargo-sort && cargo-sort --check
 
   # https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#upgrading-a-workflow-that-accesses-ghcrio
