@@ -1,3 +1,17 @@
+//!
+//! An mdBook preprocessor that uses Pandoc to add referencing to each chapter from a bibfile.
+//!
+//! Usage: In your book.toml file define the preprocessor command with the paths
+//! to your .bib and .csl files.
+//! ```
+//! [preprocessor.bibliography]
+//! command = "mdbook-bibfile-referencing bibliography.bib ieee.csl"
+//! ```
+//!
+//! See the [Pandoc Citeproc guide](https://pandoc.org/demo/example19/Extension-citations.html)
+//! for how to use references in your book's markdown source.
+//!
+
 #[cfg(test)]
 mod test;
 
@@ -80,7 +94,7 @@ fn handle_preprocessing(bib: PathBuf, csl: PathBuf) -> Result<(), Error> {
     Ok(())
 }
 
-pub struct Bibliography {
+struct Bibliography {
     pandoc: Pandoc,
 }
 
@@ -119,7 +133,7 @@ impl Preprocessor for Bibliography {
     }
 }
 
-pub fn builtin_citeproc_support() -> Result<bool, Error> {
+pub(crate) fn builtin_citeproc_support() -> Result<bool, Error> {
     let output = Command::new("pandoc")
         .arg("--version")
         .output()
