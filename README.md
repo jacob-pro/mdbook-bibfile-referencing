@@ -1,7 +1,7 @@
 # mdBook Bibfile Referencing
 
 [![Build status](https://github.com/jacob-pro/mdbook-bibfile-referencing/actions/workflows/rust.yml/badge.svg)](https://github.com/jacob-pro/mdbook-bibfile-referencing/actions)
-![crates.io](https://img.shields.io/crates/v/mdbook-bibfile-referencing.svg)
+[![crates.io](https://img.shields.io/crates/v/mdbook-bibfile-referencing.svg)](https://crates.io/crates/mdbook-bibfile-referencing)
 
 An mdBook preprocessor that uses Pandoc to add referencing to each chapter from a bibfile.
 
