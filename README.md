@@ -30,3 +30,20 @@ cargo install --git https://github.com/jacob-pro/mdbook-bibfile-referencing
 
 (Waiting on [rust-pandoc](https://github.com/oli-obk/rust-pandoc/issues/40) 
 before publishing to crates.io)
+
+## Usage in CI/CD
+
+There is a docker image: `ghcr.io/jacob-pro/mdbook-bibfile-referencing:latest` provided to make it simple and fast to 
+build an mdbook in a CI system. For example in GitHub Actions you could have:
+
+```
+jobs:
+  deploy:
+    runs-on: ubuntu-18.04
+    container:
+      image: ghcr.io/jacob-pro/mdbook-bibfile-referencing:latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build book
+        run: mdbook build
+```
