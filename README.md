@@ -1,6 +1,7 @@
 # mdBook Bibfile Referencing
 
 [![Build status](https://github.com/jacob-pro/mdbook-bibfile-referencing/actions/workflows/rust.yml/badge.svg)](https://github.com/jacob-pro/mdbook-bibfile-referencing/actions)
+![crates.io](https://img.shields.io/crates/v/mdbook-bibfile-referencing.svg)
 
 An mdBook preprocessor that uses Pandoc to add referencing to each chapter from a bibfile.
 
@@ -25,11 +26,8 @@ see the [Pandoc Citeproc Docs](https://pandoc.org/demo/example19/Extension-citat
 **Make sure you have [Pandoc Installed](https://pandoc.org/installing.html)**.
 
 ```
-cargo install --git https://github.com/jacob-pro/mdbook-bibfile-referencing
+cargo install mdbook-bibfile-referencing
 ```
-
-(Waiting on [rust-pandoc](https://github.com/oli-obk/rust-pandoc/issues/40) 
-before publishing to crates.io)
 
 ## Usage in CI/CD
 
