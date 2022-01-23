@@ -146,13 +146,11 @@ pub(crate) fn builtin_citeproc_support() -> Result<bool, Error> {
         let version = stdout
             .lines()
             .next()
-            .ok_or(Error::msg("Pandoc version error"))?
+            .ok_or_else(|| Error::msg("Pandoc version error"))?
             .replace("pandoc ", "");
-        let installed = Version::from(&version).ok_or(Error::msg(format!(
-            "Failed to parse pandoc version: {}",
-            version
-        )))?;
+        let installed = Version::from(&version)
+            .ok_or_else(|| Error::msg(format!("Failed to parse pandoc version: {}", version)))?;
         let required = Version::from("2.11.0").unwrap();
-        return Ok(installed >= required);
+        Ok(installed >= required)
     }
 }

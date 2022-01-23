@@ -1,5 +1,5 @@
 use crate::builtin_citeproc_support;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 const EXPECTED_INLINE: &str = "Paragraph contents with an inline [1, p. 22] reference.";
@@ -39,7 +39,7 @@ fn line_break_to_space(s: &str) -> String {
     line_strings.join(" ")
 }
 
-fn mdbook_clean(dir: &PathBuf) {
+fn mdbook_clean(dir: &Path) {
     let output = Command::new("mdbook")
         .arg("clean")
         .current_dir(dir)
