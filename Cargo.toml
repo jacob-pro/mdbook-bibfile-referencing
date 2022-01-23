@@ -7,10 +7,9 @@ repository = "https://github.com/jacob-pro/mdbook-bibfile-referencing"
 homepage = "https://github.com/jacob-pro/mdbook-bibfile-referencing"
 license = "LGPL-2.1"
 description = "An mdBook preprocessor to add bibfile referencing to each page "
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-clap = "3.0.0-beta.2"
+clap = "=3.0.0-beta.2"
 mdbook = { version = "0.4.4", default-features = false }
 pandoc = "0.8.5"
 serde = "1.0.118"

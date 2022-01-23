@@ -41,11 +41,11 @@ jobs:
       - name: Cargo Format Check
         run: cargo fmt -- --check
       - name: Cargo Sort Check
-        run: cargo install cargo-sort && cargo-sort --check
+        run: cargo install cargo-sort --debug && cargo-sort --workspace --check
 
   # https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#upgrading-a-workflow-that-accesses-ghcrio
   package:
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+    if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')) }}
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -54,13 +54,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build image
-        run: cd docker && docker build . --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
+        run: docker build . --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
       - name: Log in to registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
       - name: Push image
         run: |
           IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
-
           # Change all uppercase to lowercase
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
           # Strip git ref prefix from version
@@ -73,3 +72,11 @@ jobs:
           echo VERSION=$VERSION
           docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
           docker push $IMAGE_ID:$VERSION
+      - uses: snok/container-retention-policy@v1
+        name: Clean untagged images
+        with:
+          image-names: ${{ env.IMAGE_NAME }}
+          cut-off: 12 hours ago UTC
+          untagged-only: true
+          account-type: personal
+          token: ${{ secrets.PACKAGE_PAT }}
