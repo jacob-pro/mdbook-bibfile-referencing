@@ -15,9 +15,9 @@
 #[cfg(test)]
 mod test;
 
-use clap::Clap;
+use anyhow::{bail, Context};
+use clap::Parser;
 use mdbook::book::{Book, BookItem};
-use mdbook::errors::Error;
 use mdbook::preprocess::{CmdPreprocessor, Preprocessor, PreprocessorContext};
 use pandoc::PandocOutput::ToBuffer;
 use pandoc::{Pandoc, PandocOption};
@@ -27,24 +27,20 @@ use std::process;
 use std::process::Command;
 use version_compare::Version;
 
-#[derive(Clap)]
+#[derive(Parser)]
 #[allow(unused)]
 struct SupportsSubCommand {
-    #[clap(about = "Check whether a renderer is supported by this preprocessor")]
+    /// Check whether a renderer is supported by this preprocessor
     renderer: String,
 }
 
-#[derive(Clap)]
+#[derive(Parser)]
 enum SubCommand {
     Supports(SupportsSubCommand),
 }
 
-#[derive(Clap)]
-#[clap(
-    version = "0.1.0",
-    author = "Jacob Halsey <jacob@jhalsey.com>",
-    about = "An mdBook preprocessor to add bibfile referencing to each page"
-)]
+#[derive(Parser)]
+#[clap(author, version, about)]
 struct Opts {
     bib: PathBuf,
     csl: PathBuf,
@@ -57,7 +53,7 @@ fn main() {
     match opts.subcommand {
         None => {
             if let Err(e) = handle_preprocessing(opts.bib, opts.csl) {
-                eprintln!("{}", e);
+                eprintln!("{:#}", e);
                 process::exit(1);
             }
         }
@@ -69,14 +65,14 @@ fn main() {
     }
 }
 
-fn handle_preprocessing(bib: PathBuf, csl: PathBuf) -> Result<(), Error> {
-    if !bib.exists() {
-        Error::msg("Bib file not found");
+fn handle_preprocessing(bib_file: PathBuf, csl_file: PathBuf) -> anyhow::Result<()> {
+    if !bib_file.exists() {
+        bail!("Bib file not found");
     }
-    if !csl.exists() {
-        Error::msg("CSL file not found");
+    if !csl_file.exists() {
+        bail!("CSL file not found");
     }
-    let pre = Bibliography::new(bib, csl, builtin_citeproc_support()?);
+    let pre = Bibliography::new(bib_file, csl_file, builtin_citeproc_support()?);
 
     let (ctx, book) = CmdPreprocessor::parse_input(io::stdin())?;
 
@@ -119,7 +115,7 @@ impl Preprocessor for Bibliography {
         "mdbook-bibfile-referencing"
     }
 
-    fn run(&self, _ctx: &PreprocessorContext, mut book: Book) -> Result<Book, Error> {
+    fn run(&self, _ctx: &PreprocessorContext, mut book: Book) -> anyhow::Result<Book> {
         book.for_each_mut(|item| {
             if let BookItem::Chapter(chapter) = item {
                 let mut p = self.pandoc.clone();
@@ -133,23 +129,26 @@ impl Preprocessor for Bibliography {
     }
 }
 
-pub(crate) fn builtin_citeproc_support() -> Result<bool, Error> {
+fn builtin_citeproc_support() -> anyhow::Result<bool> {
     let output = Command::new("pandoc")
         .arg("--version")
         .output()
-        .map_err(|_| Error::msg("Failed to call pandoc - is it installed?"))?;
+        .context("Failed to call pandoc - is it installed?")?;
     if !output.status.success() {
         let stderr = std::str::from_utf8(&output.stderr).unwrap();
-        Err(Error::msg(format!("mdbook failed to clean: {}", stderr)))
+        bail!(format!("Failed to get pandoc version: {}", stderr));
     } else {
         let stdout = std::str::from_utf8(&output.stdout).unwrap();
         let version = stdout
             .lines()
             .next()
-            .ok_or_else(|| Error::msg("Pandoc version error"))?
-            .replace("pandoc ", "");
+            .context("Pandoc version error")?
+            .split_whitespace()
+            .skip(1)
+            .next()
+            .context(format!("Failed to parse pandoc version: {}", stdout))?;
         let installed = Version::from(&version)
-            .ok_or_else(|| Error::msg(format!("Failed to parse pandoc version: {}", version)))?;
+            .context(format!("Failed to parse pandoc version: {}", version))?;
         let required = Version::from("2.11.0").unwrap();
         Ok(installed >= required)
     }
