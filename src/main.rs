@@ -25,6 +25,7 @@ use std::io;
 use std::path::PathBuf;
 use std::process;
 use std::process::Command;
+use std::time::Instant;
 use version_compare::Version;
 
 #[derive(Parser)]
@@ -118,11 +119,14 @@ impl Preprocessor for Bibliography {
     fn run(&self, _ctx: &PreprocessorContext, mut book: Book) -> anyhow::Result<Book> {
         book.for_each_mut(|item| {
             if let BookItem::Chapter(chapter) = item {
+                let now = Instant::now();
                 let mut p = self.pandoc.clone();
                 p.set_input(pandoc::InputKind::Pipe(chapter.content.clone()));
                 if let ToBuffer(x) = p.execute().unwrap() {
                     chapter.content = x;
                 }
+                let name = chapter.content.lines().next().unwrap_or("");
+                eprintln!("Chapter '{name}' referenced in {}ms", now.elapsed().as_millis());
             }
         });
         Ok(book)
