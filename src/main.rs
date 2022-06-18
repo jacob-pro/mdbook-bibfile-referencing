@@ -125,9 +125,13 @@ impl Preprocessor for Bibliography {
                 if let ToBuffer(x) = p.execute().unwrap() {
                     chapter.content = x;
                 }
-                let name = chapter.content.lines().next().unwrap_or("");
+                let path = chapter
+                    .path
+                    .as_ref()
+                    .map(|p| p.display().to_string())
+                    .unwrap_or_else(String::new);
                 eprintln!(
-                    "Chapter '{name}' referenced in {}ms",
+                    "Chapter '{path}' referenced in {}ms",
                     now.elapsed().as_millis()
                 );
             }
