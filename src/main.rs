@@ -126,7 +126,10 @@ impl Preprocessor for Bibliography {
                     chapter.content = x;
                 }
                 let name = chapter.content.lines().next().unwrap_or("");
-                eprintln!("Chapter '{name}' referenced in {}ms", now.elapsed().as_millis());
+                eprintln!(
+                    "Chapter '{name}' referenced in {}ms",
+                    now.elapsed().as_millis()
+                );
             }
         });
         Ok(book)
@@ -148,10 +151,9 @@ fn builtin_citeproc_support() -> anyhow::Result<bool> {
             .next()
             .context("Pandoc version error")?
             .split_whitespace()
-            .skip(1)
-            .next()
+            .nth(1)
             .context(format!("Failed to parse pandoc version: {}", stdout))?;
-        let installed = Version::from(&version)
+        let installed = Version::from(version)
             .context(format!("Failed to parse pandoc version: {}", version))?;
         let required = Version::from("2.11.0").unwrap();
         Ok(installed >= required)
