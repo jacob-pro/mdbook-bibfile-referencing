@@ -1,7 +1,8 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt update && apt install curl pandoc pandoc-citeproc git build-essential nodejs npm -y
+RUN pandoc --version
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 RUN cargo install mdbook
