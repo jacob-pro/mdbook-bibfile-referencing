@@ -6,4 +6,4 @@ src = "src"
 title = "test-book"
 
 [preprocessor.bibliography]
-command = "cargo run src/bibliography.bib src/ieee.csl"
+command = "cargo run src/bibliography.bib src/ieee.csl --flavour commonmark"
