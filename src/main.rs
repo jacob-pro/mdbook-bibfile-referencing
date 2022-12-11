@@ -52,7 +52,7 @@ struct Opts {
     #[clap(long, value_enum, default_value_t = InputFlavour::MarkdownGithub)]
     input_format: InputFlavour,
     /// Override the output flavour used by Pandoc (not recommended)
-    #[clap(long, value_enum, default_value_t = OutputFlavour::Commonmark)]
+    #[clap(long, value_enum, default_value_t = OutputFlavour::Gfm)]
     output_format: OutputFlavour,
     #[clap(subcommand)]
     subcommand: Option<SubCommand>,

@@ -3,6 +3,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 const EXPECTED_INLINE: &str = r##"Paragraph contents with an inline <a href="#ref-clines1974evidence">[1, p. 22]</a> reference."##;
+const EXPECTED_INLINE_OLD: &str = r##"Paragraph contents with an inline [<a href="#ref-clines1974evidence">1</a>, p. 22] reference."##;
 
 const EXPECTED_REFERENCE: &str =
     "The Evidence for an Autumnal New Year in Pre-Exilic Israel Reconsidered";
@@ -33,7 +34,7 @@ fn test_book() {
         .expect("Failed to read chapter_1.html");
     let output_chapter = line_break_to_space(&output_chapter);
     assert!(
-        output_chapter.contains(EXPECTED_INLINE),
+        output_chapter.contains(EXPECTED_INLINE) || output_chapter.contains(EXPECTED_INLINE_OLD),
         "Expected reference to be replaced with number"
     );
     assert!(
