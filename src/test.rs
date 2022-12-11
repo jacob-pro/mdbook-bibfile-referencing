@@ -2,10 +2,13 @@ use crate::builtin_citeproc_support;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-const EXPECTED_INLINE: &str = "Paragraph contents with an inline [1, p. 22] reference.";
+const EXPECTED_INLINE: &str = r##"Paragraph contents with an inline <a href="#ref-clines1974evidence">[1, p. 22]</a> reference."##;
+const EXPECTED_INLINE_OLD: &str = r##"Paragraph contents with an inline [<a href="#ref-clines1974evidence">1</a>, p. 22] reference."##;
 
-const EXPECTED_REFERENCE: &str = "The Evidence for an Autumnal New Year in Pre-Exilic Israel
-Reconsidered";
+const EXPECTED_REFERENCE: &str =
+    "The Evidence for an Autumnal New Year in Pre-Exilic Israel Reconsidered";
+
+const EXPECTED_ID: &str = r#"id="ref-clines1974evidence""#;
 
 #[test]
 fn test_book() {
@@ -30,8 +33,18 @@ fn test_book() {
     let output_chapter = std::fs::read_to_string(test_book.join("book").join("chapter_1.html"))
         .expect("Failed to read chapter_1.html");
     let output_chapter = line_break_to_space(&output_chapter);
-    assert!(output_chapter.contains(&line_break_to_space(EXPECTED_INLINE)));
-    assert!(output_chapter.contains(&line_break_to_space(EXPECTED_REFERENCE)));
+    assert!(
+        output_chapter.contains(EXPECTED_INLINE) || output_chapter.contains(EXPECTED_INLINE_OLD),
+        "Expected reference to be replaced with number"
+    );
+    assert!(
+        output_chapter.contains(EXPECTED_REFERENCE),
+        "Expected title in bibliography"
+    );
+    assert!(
+        output_chapter.contains(EXPECTED_ID),
+        "Expected link id to be present"
+    );
 }
 
 fn line_break_to_space(s: &str) -> String {

@@ -6,4 +6,7 @@ src = "src"
 title = "test-book"
 
 [preprocessor.bibliography]
-command = "cargo run src/bibliography.bib src/ieee.csl --flavour commonmark"
+command = "cargo run src/bibliography.bib src/ieee.csl"
+
+[output.html]
+mathjax-support = true
