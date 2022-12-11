@@ -1,6 +1,6 @@
 [package]
 name = "mdbook-bibfile-referencing"
-version = "0.2.1"
+version = "0.3.0"
 authors = ["Jacob Halsey <jacob@jhalsey.com>"]
 edition = "2021"
 repository = "https://github.com/jacob-pro/mdbook-bibfile-referencing"

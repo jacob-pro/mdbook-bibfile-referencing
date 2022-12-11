@@ -9,3 +9,7 @@ test:
 format:
 	cargo fmt
 	cargo-sort --workspace
+
+.PHONY: install
+install:
+	cargo install --debug --path .
